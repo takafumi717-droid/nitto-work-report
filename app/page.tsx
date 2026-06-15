@@ -19,20 +19,24 @@ export default async function TopPage() {
 
       <div className="flex flex-col gap-3">
         {(employees ?? []).map((employee) => (
-          <Link
-            key={employee.id}
-            href={`/report/new?employee=${employee.id}`}
-            className="block w-full rounded-2xl bg-white px-4 py-4 text-center text-lg font-bold text-slate-800 shadow-sm active:bg-blue-50"
-          >
-            {employee.name}
-          </Link>
+          <div key={employee.id} className="rounded-2xl bg-white p-3 shadow-sm">
+            <p className="mb-2 text-center text-lg font-bold text-slate-800">{employee.name}</p>
+            <div className="flex gap-2">
+              <Link
+                href={`/report/new?employee=${employee.id}`}
+                className="flex-1 rounded-xl bg-blue-600 px-3 py-3 text-center text-sm font-bold text-white active:bg-blue-700"
+              >
+                日報を入力
+              </Link>
+              <Link
+                href={`/report/mine?employee=${employee.id}`}
+                className="flex-1 rounded-xl border-2 border-slate-300 bg-white px-3 py-3 text-center text-sm font-bold text-slate-700 active:bg-slate-100"
+              >
+                確認・修正
+              </Link>
+            </div>
+          </div>
         ))}
-      </div>
-
-      <div className="mt-6 text-center">
-        <Link href="/report/mine" className="text-sm text-blue-600 underline">
-          日報の確認・修正
-        </Link>
       </div>
 
       <div className="mt-3 text-center">
