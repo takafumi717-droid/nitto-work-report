@@ -1,15 +1,28 @@
 -- ============================================================
--- anonキー（一般社員向け画面）からのアクセスを許可するRLSポリシー
--- 日報入力画面（氏名選択・日報登録）で使用する。
+-- 管理者であっても日報入力・確認画面に表示したい従業員を
+-- 個別に指定できるようにするための変更
+-- (既存のSupabaseプロジェクトに対してSQL Editorで実行してください)
 -- ============================================================
 
--- employees: 在籍中・一般社員のみ参照可能（管理者・退職者は除外）
+alter table employees
+  add column if not exists can_submit_reports boolean not null default false;
+
+-- 大久保　圭 を日報入力・確認画面の氏名選択リストに表示する
+update employees set can_submit_reports = true where name = '大久保　圭';
+
+-- ------------------------------------------------------------
+-- RLSポリシーの再作成
+-- 「is_admin = false」の条件を
+-- 「is_admin = false または can_submit_reports = true」に変更する
+-- ------------------------------------------------------------
+
+drop policy if exists "anon can read active non-admin employees" on employees;
 create policy "anon can read active non-admin employees"
   on employees for select
   to anon
   using (is_active = true and (is_admin = false or can_submit_reports = true));
 
--- work_reports: 在籍中・一般社員の場合のみ新規登録を許可
+drop policy if exists "anon can insert work reports for active employees" on work_reports;
 create policy "anon can insert work reports for active employees"
   on work_reports for insert
   to anon
@@ -22,7 +35,7 @@ create policy "anon can insert work reports for active employees"
     )
   );
 
--- work_reports: 在籍中・一般社員は自分の日報を参照可能
+drop policy if exists "anon can read own work reports" on work_reports;
 create policy "anon can read own work reports"
   on work_reports for select
   to anon
@@ -34,7 +47,7 @@ create policy "anon can read own work reports"
     )
   );
 
--- work_reports: 在籍中・一般社員は自分の日報を修正可能
+drop policy if exists "anon can update own work reports" on work_reports;
 create policy "anon can update own work reports"
   on work_reports for update
   to anon
@@ -53,7 +66,7 @@ create policy "anon can update own work reports"
     )
   );
 
--- work_reports: 在籍中・一般社員は自分の日報を削除可能
+drop policy if exists "anon can delete own work reports" on work_reports;
 create policy "anon can delete own work reports"
   on work_reports for delete
   to anon
@@ -65,7 +78,7 @@ create policy "anon can delete own work reports"
     )
   );
 
--- report_edits: 在籍中・一般社員は自分の修正履歴を登録可能
+drop policy if exists "anon can insert own report edits" on report_edits;
 create policy "anon can insert own report edits"
   on report_edits for insert
   to anon

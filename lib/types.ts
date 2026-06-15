@@ -4,6 +4,7 @@ export type Employee = {
   sort_order: number;
   is_admin: boolean;
   is_active: boolean;
+  can_submit_reports: boolean;
   admin_pin: string | null;
   created_at: string;
   updated_at: string;

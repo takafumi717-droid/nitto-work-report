@@ -15,6 +15,7 @@ create table if not exists employees (
   sort_order  integer not null,
   is_admin    boolean not null default false,
   is_active   boolean not null default true,
+  can_submit_reports boolean not null default false,
   admin_pin   text,
   created_at  timestamptz not null default now(),
   updated_at  timestamptz not null default now()
@@ -95,7 +96,8 @@ insert into employees (name, sort_order, is_admin, is_active, admin_pin) values
   ('その他',          21, false, true, null);
 
 -- 管理者3名（一般社員選択リストには表示しない。is_admin=trueで判定して除外する）
-insert into employees (name, sort_order, is_admin, is_active, admin_pin) values
-  ('大久保　喬史', 101, true, true, '0717'),
-  ('大久保　圭',   102, true, true, '0717'),
-  ('末継　良治',   103, true, true, '0717');
+-- 大久保　圭 は can_submit_reports=true により日報入力・確認画面にも表示する
+insert into employees (name, sort_order, is_admin, is_active, can_submit_reports, admin_pin) values
+  ('大久保　喬史', 101, true, true, false, '0717'),
+  ('大久保　圭',   102, true, true, true,  '0717'),
+  ('末継　良治',   103, true, true, false, '0717');

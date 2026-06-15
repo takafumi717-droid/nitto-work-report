@@ -16,7 +16,7 @@ export default async function NewReportPage({
     .from("employees")
     .select("id, name")
     .eq("is_active", true)
-    .eq("is_admin", false)
+    .or("is_admin.eq.false,can_submit_reports.eq.true")
     .order("sort_order", { ascending: true });
 
   return (
