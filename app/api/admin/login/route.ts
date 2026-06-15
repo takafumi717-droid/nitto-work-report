@@ -17,6 +17,7 @@ export async function POST(request: NextRequest) {
     .eq("is_admin", true)
     .eq("is_active", true)
     .eq("admin_pin", pin)
+    .limit(1)
     .maybeSingle();
 
   if (!admin) {
