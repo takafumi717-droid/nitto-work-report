@@ -31,7 +31,7 @@ export default async function AdminSummaryPage({
 
   const { data: reports } = await supabase
     .from("work_reports")
-    .select("employee_id, work_hours")
+    .select("employee_id, slip_no, work_hours")
     .gte("work_date", startDate)
     .lt("work_date", endDate);
 
@@ -42,6 +42,17 @@ export default async function AdminSummaryPage({
   });
 
   const activeSummary = summary.filter((s) => s.count > 0);
+
+  const bySlip = new Map<string, { count: number; totalHours: number }>();
+  for (const r of reports ?? []) {
+    const entry = bySlip.get(r.slip_no) ?? { count: 0, totalHours: 0 };
+    entry.count += 1;
+    entry.totalHours += Number(r.work_hours);
+    bySlip.set(r.slip_no, entry);
+  }
+  const slipSummary = Array.from(bySlip.entries())
+    .map(([slipNo, v]) => ({ slipNo, ...v }))
+    .sort((a, b) => a.slipNo.localeCompare(b.slipNo));
 
   return (
     <PageContainer>
@@ -65,32 +76,66 @@ export default async function AdminSummaryPage({
         </button>
       </form>
 
-      <div className="overflow-x-auto rounded-2xl bg-white shadow-sm">
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="border-b border-slate-200 text-left">
-              <th className="px-3 py-2">氏名</th>
-              <th className="px-3 py-2 text-right">件数</th>
-              <th className="px-3 py-2 text-right">合計時間</th>
-            </tr>
-          </thead>
-          <tbody>
-            {activeSummary.length === 0 && (
-              <tr>
-                <td colSpan={3} className="px-3 py-4 text-center text-slate-500">
-                  該当するデータがありません
-                </td>
+      <div>
+        <h2 className="mb-2 px-1 text-sm font-bold text-slate-600">従業員別集計</h2>
+        <div className="overflow-x-auto rounded-2xl bg-white shadow-sm">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-slate-200 text-left">
+                <th className="px-3 py-2">氏名</th>
+                <th className="px-3 py-2 text-right">件数</th>
+                <th className="px-3 py-2 text-right">合計時間</th>
               </tr>
-            )}
-            {activeSummary.map((s) => (
-              <tr key={s.id} className="border-b border-slate-100">
-                <td className="px-3 py-2">{s.name}</td>
-                <td className="px-3 py-2 text-right">{s.count}</td>
-                <td className="px-3 py-2 text-right font-bold">{s.totalHours.toFixed(2)}</td>
+            </thead>
+            <tbody>
+              {activeSummary.length === 0 && (
+                <tr>
+                  <td colSpan={3} className="px-3 py-4 text-center text-slate-500">
+                    該当するデータがありません
+                  </td>
+                </tr>
+              )}
+              {activeSummary.map((s) => (
+                <tr key={s.id} className="border-b border-slate-100">
+                  <td className="px-3 py-2">{s.name}</td>
+                  <td className="px-3 py-2 text-right">{s.count}</td>
+                  <td className="px-3 py-2 text-right font-bold">{s.totalHours.toFixed(2)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div>
+        <h2 className="mb-2 px-1 text-sm font-bold text-slate-600">伝票番号別集計</h2>
+        <div className="overflow-x-auto rounded-2xl bg-white shadow-sm">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-slate-200 text-left">
+                <th className="px-3 py-2">伝票番号</th>
+                <th className="px-3 py-2 text-right">件数</th>
+                <th className="px-3 py-2 text-right">合計時間</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {slipSummary.length === 0 && (
+                <tr>
+                  <td colSpan={3} className="px-3 py-4 text-center text-slate-500">
+                    該当するデータがありません
+                  </td>
+                </tr>
+              )}
+              {slipSummary.map((s) => (
+                <tr key={s.slipNo} className="border-b border-slate-100">
+                  <td className="px-3 py-2">{s.slipNo}</td>
+                  <td className="px-3 py-2 text-right">{s.count}</td>
+                  <td className="px-3 py-2 text-right font-bold">{s.totalHours.toFixed(2)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
     </PageContainer>
   );

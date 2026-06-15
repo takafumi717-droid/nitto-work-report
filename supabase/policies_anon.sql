@@ -21,3 +21,42 @@ create policy "anon can insert work reports for active employees"
         and e.is_admin = false
     )
   );
+
+-- work_reports: 在籍中・一般社員は自分の日報を参照可能
+create policy "anon can read own work reports"
+  on work_reports for select
+  to anon
+  using (
+    exists (
+      select 1 from employees e
+      where e.id = employee_id and e.is_active = true and e.is_admin = false
+    )
+  );
+
+-- work_reports: 在籍中・一般社員は自分の日報を修正可能
+create policy "anon can update own work reports"
+  on work_reports for update
+  to anon
+  using (
+    exists (
+      select 1 from employees e
+      where e.id = employee_id and e.is_active = true and e.is_admin = false
+    )
+  )
+  with check (
+    exists (
+      select 1 from employees e
+      where e.id = employee_id and e.is_active = true and e.is_admin = false
+    )
+  );
+
+-- report_edits: 在籍中・一般社員は自分の修正履歴を登録可能
+create policy "anon can insert own report edits"
+  on report_edits for insert
+  to anon
+  with check (
+    exists (
+      select 1 from employees e
+      where e.id = edited_by and e.is_active = true and e.is_admin = false
+    )
+  );

@@ -30,6 +30,12 @@ export default async function TopPage() {
       </div>
 
       <div className="mt-6 text-center">
+        <Link href="/report/mine" className="text-sm text-blue-600 underline">
+          日報の確認・修正
+        </Link>
+      </div>
+
+      <div className="mt-3 text-center">
         <Link href="/admin/login" className="text-sm text-slate-400 underline">
           管理者ログイン
         </Link>

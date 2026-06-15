@@ -37,13 +37,14 @@ export async function GET(request: NextRequest) {
     .lt("work_date", endDate)
     .order("work_date", { ascending: true });
 
-  const header = ["作業日", "氏名", "作業伝票番号", "作業時間", "備考"];
+  const header = ["作業日", "氏名", "作業伝票番号", "作業時間", "備考", "登録日時"];
   const rows = ((reports ?? []) as WorkReportWithEmployee[]).map((r) => [
     r.work_date,
     r.employees?.name ?? "",
     r.slip_no,
     Number(r.work_hours).toFixed(2),
     r.remarks ?? "",
+    new Date(r.created_at).toLocaleString("ja-JP", { timeZone: "Asia/Tokyo" }),
   ]);
 
   const lines = [header, ...rows].map((row) => row.map((v) => csvEscape(String(v))).join(","));

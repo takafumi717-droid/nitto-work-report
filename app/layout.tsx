@@ -4,12 +4,23 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "作業日報 | 株式会社日東工業所",
   description: "作業日報入力システム",
+  manifest: "/manifest.json",
+  icons: {
+    icon: "/icon.svg",
+    apple: "/icon.svg",
+  },
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "作業日報",
+  },
 };
 
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,
+  themeColor: "#2563eb",
 };
 
 export default function RootLayout({
