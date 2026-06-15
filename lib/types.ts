@@ -22,7 +22,7 @@ export type WorkReport = {
 
 export type ReportEdit = {
   id: string;
-  work_report_id: string;
+  work_report_id: string | null;
   edited_by: string;
   before_data: Record<string, unknown>;
   after_data: Record<string, unknown>;

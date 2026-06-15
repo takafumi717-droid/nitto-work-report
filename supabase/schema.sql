@@ -49,7 +49,7 @@ create index if not exists idx_work_reports_work_date on work_reports (work_date
 -- ============================================================
 create table if not exists report_edits (
   id              uuid primary key default gen_random_uuid(),
-  work_report_id  uuid not null references work_reports(id),
+  work_report_id  uuid references work_reports(id) on delete set null,
   edited_by       uuid not null references employees(id),
   before_data     jsonb not null,
   after_data      jsonb not null,

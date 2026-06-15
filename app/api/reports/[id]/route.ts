@@ -72,3 +72,44 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
 
   return NextResponse.json({ ok: true });
 }
+
+export async function DELETE(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  const body = await request.json().catch(() => null);
+  const employeeId = body?.employee_id;
+
+  if (!employeeId || typeof employeeId !== "string") {
+    return NextResponse.json({ error: "氏名を選択してください" }, { status: 400 });
+  }
+
+  const supabase = createSupabaseAnonClient();
+
+  const { data: before, error: fetchError } = await supabase
+    .from("work_reports")
+    .select("*")
+    .eq("id", id)
+    .single();
+
+  if (fetchError || !before) {
+    return NextResponse.json({ error: "日報が見つかりません" }, { status: 404 });
+  }
+
+  if (before.employee_id !== employeeId) {
+    return NextResponse.json({ error: "この日報は削除できません" }, { status: 403 });
+  }
+
+  await supabase.from("report_edits").insert({
+    work_report_id: id,
+    edited_by: employeeId,
+    before_data: before,
+    after_data: { deleted: true },
+  });
+
+  const { error: deleteError } = await supabase.from("work_reports").delete().eq("id", id);
+
+  if (deleteError) {
+    return NextResponse.json({ error: "削除に失敗しました" }, { status: 500 });
+  }
+
+  return NextResponse.json({ ok: true });
+}
