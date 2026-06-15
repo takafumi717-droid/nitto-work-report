@@ -6,8 +6,8 @@ export const metadata: Metadata = {
   description: "作業日報入力システム",
   manifest: "/manifest.json",
   icons: {
-    icon: "/icon.svg",
-    apple: "/icon.svg",
+    icon: "/icon.jpg",
+    apple: "/icon.jpg",
   },
   appleWebApp: {
     capable: true,
