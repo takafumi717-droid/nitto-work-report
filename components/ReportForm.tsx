@@ -71,7 +71,7 @@ export function ReportForm({
         return;
       }
 
-      router.push("/report/done");
+      router.push(`/report/done?employee=${employeeId}`);
     } catch {
       setError("登録に失敗しました。通信状況を確認してください");
       setSubmitting(false);
