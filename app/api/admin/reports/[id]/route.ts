@@ -74,3 +74,38 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
 
   return NextResponse.json({ ok: true });
 }
+
+export async function DELETE(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const admin = await getCurrentAdmin();
+  if (!admin) {
+    return NextResponse.json({ error: "認証が必要です" }, { status: 401 });
+  }
+
+  const { id } = await params;
+  const supabase = createSupabaseServerClient();
+
+  const { data: before, error: fetchError } = await supabase
+    .from("work_reports")
+    .select("*")
+    .eq("id", id)
+    .single();
+
+  if (fetchError || !before) {
+    return NextResponse.json({ error: "日報が見つかりません" }, { status: 404 });
+  }
+
+  await supabase.from("report_edits").insert({
+    work_report_id: id,
+    edited_by: admin.id,
+    before_data: before,
+    after_data: { deleted: true },
+  });
+
+  const { error: deleteError } = await supabase.from("work_reports").delete().eq("id", id);
+
+  if (deleteError) {
+    return NextResponse.json({ error: "削除に失敗しました" }, { status: 500 });
+  }
+
+  return NextResponse.json({ ok: true });
+}

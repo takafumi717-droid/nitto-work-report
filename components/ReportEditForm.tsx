@@ -23,6 +23,7 @@ export function ReportEditForm({
   const [remarks, setRemarks] = useState(report.remarks ?? "");
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -59,6 +60,33 @@ export function ReportEditForm({
     } catch {
       setError("更新に失敗しました");
       setSubmitting(false);
+    }
+  }
+
+  async function handleDelete() {
+    setError("");
+    if (!window.confirm("この日報を削除します。よろしいですか？")) {
+      return;
+    }
+
+    setDeleting(true);
+    try {
+      const res = await fetch(`/api/admin/reports/${report.id}`, {
+        method: "DELETE",
+      });
+
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        setError(data.error ?? "削除に失敗しました");
+        setDeleting(false);
+        return;
+      }
+
+      router.push("/admin/reports");
+      router.refresh();
+    } catch {
+      setError("削除に失敗しました");
+      setDeleting(false);
     }
   }
 
@@ -131,8 +159,17 @@ export function ReportEditForm({
         <p className="rounded-xl bg-red-50 px-3 py-2 text-sm font-bold text-red-600">{error}</p>
       )}
 
-      <Button type="submit" disabled={submitting}>
+      <Button type="submit" disabled={submitting || deleting}>
         {submitting ? "保存中..." : "保存する"}
+      </Button>
+
+      <Button
+        type="button"
+        variant="danger"
+        disabled={submitting || deleting}
+        onClick={handleDelete}
+      >
+        {deleting ? "削除中..." : "この日報を削除する"}
       </Button>
     </form>
   );
